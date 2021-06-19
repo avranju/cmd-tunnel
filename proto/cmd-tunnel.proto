@@ -1,0 +1,15 @@
+syntax = "proto3";
+package cmdtunnel;
+
+service CommandTunnel {
+    rpc run (CommandRequest) returns (stream CommandReply);
+}
+
+message CommandRequest {
+    string command = 1;
+}
+
+message CommandReply {
+    string stdout = 1;
+    string stderr = 2;
+}
