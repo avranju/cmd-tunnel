@@ -2,7 +2,7 @@ syntax = "proto3";
 package cmdtunnel;
 
 service CommandTunnel {
-    rpc run (CommandRequest) returns (stream CommandReply);
+    rpc Run (CommandRequest) returns (stream CommandReply);
 }
 
 message CommandRequest {
@@ -10,6 +10,8 @@ message CommandRequest {
 }
 
 message CommandReply {
-    string stdout = 1;
-    string stderr = 2;
+    oneof output {
+        string stdout = 1;
+        string stderr = 2;
+    }
 }
