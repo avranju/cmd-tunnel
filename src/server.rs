@@ -74,7 +74,7 @@ impl CommandTunnel for CommandTunnelService {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let addr = "[::1]:7786".parse().unwrap();
+    let addr = "0.0.0.0:7786".parse().unwrap();
     let svr = CommandTunnelServer::new(CommandTunnelService);
 
     println!("Listening for commands at http://localhost:7786");

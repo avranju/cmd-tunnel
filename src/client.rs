@@ -15,7 +15,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let command = env::args().nth(1).unwrap_or_default();
     let args = env::args().skip(2).collect::<Vec<_>>();
 
-    let addr = "http://[::1]:7786";
+    let addr = env::var("CMD_TUNNEL_SERVER").unwrap_or_else(|_| "http://[::1]:7786".to_string());
     let mut client = CommandTunnelClient::connect(addr).await?;
     let mut stream = client
         .run(Request::new(CommandRequest { command, args }))
@@ -26,7 +26,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         if let Some(output) = resp.output {
             match output {
                 Output::Stdout(s) => println!("{}", style(s).for_stdout()),
-                Output::Stderr(s) => println!("{}", style(s).red()),
+                Output::Stderr(s) => println!("{}", style(s).green()),
             }
         }
     }
