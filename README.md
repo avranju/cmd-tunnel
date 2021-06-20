@@ -23,4 +23,11 @@ Next open up the client terminal from where you'll be issuing commands which in 
 cmd-tunnel-client ctest -C Debug -R bsi_local_ut
 ```
 
+Sometimes you may need to explicitly specify the network interface to connect on when connecting to the server. You can do so via an environment variable called `CMD_TUNNEL_SERVER`. Like so:
+
+```bash
+export CMD_TUNNEL_SERVER=http://192.68.86.101:7786
+cmd-tunnel-client cmd.exe /C dir
+```
+
 I would probably alias `cmd-tunnel-client` to `cx` or something so its easier on my fingers. That's it.
