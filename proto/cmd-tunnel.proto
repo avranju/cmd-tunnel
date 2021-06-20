@@ -7,6 +7,7 @@ service CommandTunnel {
 
 message CommandRequest {
     string command = 1;
+    repeated string args = 2;
 }
 
 message CommandReply {
