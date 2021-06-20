@@ -5,7 +5,7 @@ stdout and stderr. I wrote this because I was tired of the Windows terminal
 not supporting the affordances I'd become used to in Linux land with zsh. This
 lets me be in zsh but run commands and such in a Windows terminal.
 
-# Build
+## Build
 
 1. Install Rust from [rustup](https://rustup.rs/)
 2. Clone this repo and CD into it
@@ -13,7 +13,7 @@ lets me be in zsh but run commands and such in a Windows terminal.
 
 Now you should have 2 binaries in your `~/.cargo/bin` path called `cmd-tunnel-server` and `cmd-tunnel-client`.
 
-# Run
+## Run
 
 Open the terminal where you want commands to be run which in my case would be a Windows terminal with the specific environment setup that lets me run the commands that I need run and then run `cmd-tunnel-server`.
 
