@@ -22,12 +22,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?
         .into_inner();
 
-    while let Some(resp) = stream.message().await? {
-        if let Some(output) = resp.output {
-            match output {
-                Output::Stdout(s) => println!("{}", style(s).for_stdout()),
-                Output::Stderr(s) => println!("{}", style(s).green()),
-            }
+    while let Some(output) = stream.message().await?.and_then(|resp| resp.output) {
+        match output {
+            Output::Stdout(s) => println!("{}", style(s).for_stdout()),
+            Output::Stderr(s) => println!("{}", style(s).green()),
         }
     }
 
