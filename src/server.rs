@@ -1,4 +1,4 @@
-use std::process::Stdio;
+use std::{io::{Write, stdout}, process::Stdio};
 
 pub mod cmdtunnel {
     tonic::include_proto!("cmdtunnel");
@@ -25,11 +25,12 @@ impl CommandTunnel for CommandTunnelService {
     type RunStream = ReceiverStream<Result<CommandReply, Status>>;
 
     async fn run(&self, req: Request<CommandRequest>) -> Result<Response<Self::RunStream>, Status> {
-        println!(
-            "Running command: {}, args: {:?}",
+        print!(
+            "Running command: {}, args: {:?}...",
             req.get_ref().command,
             req.get_ref().args
         );
+        stdout().lock().flush()?;
 
         let mut cmd = Command::new(req.get_ref().command.clone())
             .args(&req.get_ref().args)
@@ -41,32 +42,52 @@ impl CommandTunnel for CommandTunnelService {
         let stdout_lines = stdout.map(|s| s.lines());
         let stderr_lines = stderr.map(|s| s.lines());
         let (tx, rx) = mpsc::channel(1024);
+        let (tx_done, mut rx_done) = mpsc::channel(1024);
 
         if let Some(mut stdout_lines) = stdout_lines {
             let tx = tx.clone();
+            let tx_done = tx_done.clone();
             tokio::spawn(async move {
-                while let Some(line) = stdout_lines.next_line().await.unwrap() {
-                    tx.send(Ok(CommandReply {
-                        output: Some(Output::Stdout(line)),
-                    }))
-                    .await
-                    .unwrap();
+                while let Ok(Some(line)) = stdout_lines.next_line().await {
+                    if tx
+                        .send(Ok(CommandReply {
+                            output: Some(Output::Stdout(line)),
+                        }))
+                        .await
+                        .is_err()
+                    {
+                        break;
+                    }
                 }
+
+                let _ = tx_done.send(()).await;
             });
         }
 
         if let Some(mut stderr_lines) = stderr_lines {
             let tx = tx.clone();
+            let tx_done = tx_done.clone();
             tokio::spawn(async move {
-                while let Some(line) = stderr_lines.next_line().await.unwrap() {
-                    tx.send(Ok(CommandReply {
-                        output: Some(Output::Stderr(line)),
-                    }))
-                    .await
-                    .unwrap();
+                while let Ok(Some(line)) = stderr_lines.next_line().await {
+                    if tx
+                        .send(Ok(CommandReply {
+                            output: Some(Output::Stderr(line)),
+                        }))
+                        .await
+                        .is_err()
+                    {
+                        break;
+                    }
                 }
+
+                let _ = tx_done.send(()).await;
             });
         }
+
+        tokio::spawn(async move {
+            let _ = rx_done.recv().await;
+            println!("done.");
+        });
 
         Ok(Response::new(ReceiverStream::new(rx)))
     }
