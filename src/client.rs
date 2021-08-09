@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     while let Some(output) = stream.message().await?.and_then(|resp| resp.output) {
         match output {
             Output::Stdout(s) => println!("{}", style(s).for_stdout()),
-            Output::Stderr(s) => println!("{}", style(s).green()),
+            Output::Stderr(s) => eprintln!("{}", style(s).green()),
         }
     }
 
