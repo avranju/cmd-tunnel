@@ -2,7 +2,7 @@
 name = "cmd-tunnel"
 version = "0.1.0"
 authors = ["Rajasekharan Vengalil <avranju@nerdworks.dev>"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -15,11 +15,12 @@ name = "cmd-tunnel-client"
 path = "src/client.rs"
 
 [dependencies]
+clap = { version = "4.4.8", features = ["derive"] }
 console = "0.14"
-tonic = "0.4"
 prost = "0.7"
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread", "process"] }
 tokio-stream = "0.1"
+tonic = "0.4"
 
 [build-dependencies]
 tonic-build = "0.4"

@@ -1,9 +1,13 @@
-use std::{io::{Write, stdout}, process::Stdio};
+use std::{
+    io::{stdout, Write},
+    process::Stdio,
+};
 
 pub mod cmdtunnel {
     tonic::include_proto!("cmdtunnel");
 }
 
+use clap::Parser;
 use cmdtunnel::{
     command_reply::Output,
     command_tunnel_server::{CommandTunnel, CommandTunnelServer},
@@ -37,8 +41,8 @@ impl CommandTunnel for CommandTunnelService {
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()?;
-        let stdout = cmd.stdout.take().map(|stdout| BufReader::new(stdout));
-        let stderr = cmd.stderr.take().map(|stderr| BufReader::new(stderr));
+        let stdout = cmd.stdout.take().map(BufReader::new);
+        let stderr = cmd.stderr.take().map(BufReader::new);
         let stdout_lines = stdout.map(|s| s.lines());
         let stderr_lines = stderr.map(|s| s.lines());
         let (tx, rx) = mpsc::channel(1024);
@@ -93,12 +97,27 @@ impl CommandTunnel for CommandTunnelService {
     }
 }
 
+#[derive(Parser, Debug)]
+struct Opt {
+    /// Host name or IP to listen on.
+    #[clap(long, short('n'), default_value = "0.0.0.0")]
+    host_name: String,
+
+    /// Port to listen on.
+    #[clap(long, short, default_value = "7786")]
+    port: u16,
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let addr = "0.0.0.0:7786".parse().unwrap();
+    let opt = Opt::parse();
+    let addr = format!("{}:{}", opt.host_name, opt.port).parse()?;
     let svr = CommandTunnelServer::new(CommandTunnelService);
 
-    println!("Listening for commands at http://localhost:7786");
+    println!(
+        "Listening for commands at http://{}:{}",
+        opt.host_name, opt.port
+    );
     Server::builder().add_service(svr).serve(addr).await?;
 
     Ok(())
