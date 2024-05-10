@@ -8,8 +8,9 @@ me be in zsh but run commands and such in a Windows terminal.
 ## Build
 
 1. Install Rust from [rustup](https://rustup.rs/)
-2. Clone this repo and CD into it
-3. Run `cargo install --path .`
+2. Install `protoc` compiler for your platform. See https://grpc.io/docs/protoc-installation/.
+3. Clone this repo and CD into it
+4. Run `cargo install --path .`
 
 Now you should have 2 binaries in your `~/.cargo/bin` path called
 `cmd-tunnel-server` and `cmd-tunnel-client`.
